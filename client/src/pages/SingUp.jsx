@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../config/Api" 
+import { IoSettingsOutline } from "react-icons/io5";
+import api from "../config/Api";
 
 const SignUp = () => {
   const navigate = useNavigate();
 
-  // ✅ single state
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -16,124 +16,125 @@ const SignUp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // ✅ common handler
   const handleChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  // ✅ submit
   const handleSubmit = async (e) => {
-    console.log(formData)
     e.preventDefault();
-    setError("");
     setLoading(true);
-
     try {
-  const res = await api.post("/user/signup", formData);
-
-  console.log("Signup Response:", res.data);
-
-  // success → login page
-  navigate("/login");
-} catch (error) {
-  console.error(
-    "Signup Error:",
-    error.response?.data || error.message
-  );
-}
- finally {
+      await api.post("/user/signup", formData);
+      navigate("/login");
+    } catch {
+      setError("Signup failed");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="card w-full max-w-md shadow-xl bg-base-100">
-        <div className="card-body">
+    <>
+      {/* ===== FORM ===== */}
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="card w-full max-w-md bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h2 className="text-2xl font-bold text-center">Sign Up</h2>
 
-          <h2 className="text-2xl font-bold text-center mb-4">Sign Up</h2>
+            {error && <p className="text-red-500 text-center">{error}</p>}
 
-          {error && (
-            <p className="text-red-500 text-center text-sm">{error}</p>
-          )}
-
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            <div>
-              <label className="label">Full Name</label>
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <input
-                type="text"
                 name="fullName"
                 className="input input-bordered w-full"
-                placeholder="Enter full name"
+                placeholder="Full Name"
                 value={formData.fullName}
                 onChange={handleChange}
-                required
               />
-            </div>
-
-            <div>
-              <label className="label">Email</label>
               <input
-                type="email"
                 name="email"
                 className="input input-bordered w-full"
-                placeholder="Enter email"
+                placeholder="Email"
                 value={formData.email}
                 onChange={handleChange}
-                required
               />
-            </div>
-
-            <div>
-              <label className="label">Phone</label>
               <input
-                type="tel"
                 name="phone"
                 className="input input-bordered w-full"
-                placeholder="Enter phone number"
+                placeholder="Phone"
                 value={formData.phone}
                 onChange={handleChange}
-                required
               />
-            </div>
-
-            <div>
-              <label className="label">Password</label>
               <input
-                type="password"
                 name="password"
+                type="password"
                 className="input input-bordered w-full"
-                placeholder="Create password"
+                placeholder="Password"
                 value={formData.password}
                 onChange={handleChange}
-                required
+              />
+
+              <button className="btn btn-primary w-full">
+                {loading ? "Creating..." : "Create Account"}
+              </button>
+            </form>
+
+            <p className="text-center text-sm mt-3">
+              Already have an account?
+              <Link to="/login" className="link link-primary ml-1">
+                Login
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== FLOATING BUTTON ===== */}
+      <button className="btn btn-primary btn-circle fixed bottom-6 right-6 z-50">
+        <IoSettingsOutline size={22} />
+      </button>
+
+      {/* ===== FLYONUI CAROUSEL ===== */}
+      <div
+        id="horizontal-thumbnails"
+        data-carousel='{ "loadingClasses": "opacity-0" }'
+        className="relative w-full max-w-4xl mx-auto my-16"
+      >
+        <div className="carousel">
+          <div className="carousel-body h-[400px]">
+            <div className="carousel-slide">
+              <img
+                src="https://cdn.flyonui.com/fy-assets/components/carousel/image-21.png"
+                className="w-full h-full object-cover"
               />
             </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary w-full"
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Create Account"}
-            </button>
-          </form>
+            <div className="carousel-slide">
+              <img
+                src="https://cdn.flyonui.com/fy-assets/components/carousel/image-14.png"
+                className="w-full h-full object-cover"
+              />
+            </div>
 
-          <p className="text-center mt-4 text-sm">
-            Already have an account?
-            <Link to="/login" className="link link-primary ml-1">
-              Login
-            </Link>
-          </p>
+            <div className="carousel-slide">
+              <img
+                src="https://cdn.flyonui.com/fy-assets/components/carousel/image-7.png"
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
 
+          <button className="carousel-prev start-4 size-10 bg-base-100 rounded-full shadow">
+            ‹
+          </button>
+
+          <button className="carousel-next end-4 size-10 bg-base-100 rounded-full shadow">
+            ›
+          </button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

@@ -12,7 +12,7 @@ export const genToken = (user, res) => {
 
     console.log(token);
 
-    res.cookie("", token, {
+    res.cookie("Chatapp", token, {
       maxAge: 1000 * 60 * 60 * 24,
       httpOnly: true,
       secure: false,

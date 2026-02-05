@@ -8,6 +8,9 @@ import cookieParser from "cookie-parser";
 import connectDB from "./src/confiq/db.js"
 import UserRouter from './src/routes/UserRouter.js'
 
+
+
+
 const app = express();
 
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));

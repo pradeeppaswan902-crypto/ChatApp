@@ -1,22 +1,25 @@
 import User from "../models/chatappModel.js";
 import bcrypt from "bcrypt";
-import { genToken } from "../utils/genToken.js";  // ✅ Import karna
 
+// ================= REGISTER =================
 export const UserRegister = async (req, res, next) => {
   try {
     const { fullName, email, phone, password } = req.body;
 
     if (!fullName || !email || !phone || !password) {
-      const error = new Error("All fields required");
-      error.statusCode = 400;
-      return next(error);
+      return res.status(400).json({
+        message: "All fields required",
+      });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({
+      email: email.toLowerCase(),
+    });
+
     if (existingUser) {
-      const error = new Error("Email already registered");
-      error.statusCode = 409;
-      return next(error);
+      return res.status(409).json({
+        message: "Email already registered",
+      });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -29,17 +32,13 @@ export const UserRegister = async (req, res, next) => {
       password: hashPassword,
     });
 
-    // ✅ Token generate using genToken from utils
-    const token = genToken(newUser);
-
     res.status(201).json({
-      message: "Registration Successful",
+      message: "User registered successfully",
       data: {
         id: newUser._id,
         fullName: newUser.fullName,
         email: newUser.email,
         phone: newUser.phone,
-        token, // send token to frontend
       },
     });
   } catch (error) {
@@ -47,44 +46,50 @@ export const UserRegister = async (req, res, next) => {
   }
 };
 
+// ================= LOGIN =================
 export const UserLogin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      const error = new Error("All fields required");
-      error.statusCode = 400;
-      return next(error);
+      return res.status(400).json({
+        message: "All fields required",
+      });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await User.findOne({
+      email: email.toLowerCase(),
+    });
+
     if (!existingUser) {
-      const error = new Error("Email not registered");
-      error.statusCode = 401;
-      return next(error);
+      return res.status(401).json({
+        message: "Email not registered",
+      });
     }
 
-    const isVerified = await bcrypt.compare(password, existingUser.password);
-    if (!isVerified) {
-      const error = new Error("Password didn't match");
-      error.statusCode = 401;
-      return next(error);
+    const isMatch = await bcrypt.compare(
+      password,
+      existingUser.password
+    );
+
+    if (!isMatch) {
+      return res.status(401).json({
+        message: "Password didn't match",
+      });
     }
 
-    // ✅ Token generate using genToken from utils
-    const token = genToken(existingUser);
-
+    
     res.status(200).json({
-      message: "Login Successful",
+      message: "Login successful",
       data: {
         id: existingUser._id,
         fullName: existingUser.fullName,
         email: existingUser.email,
         phone: existingUser.phone,
-        token,
       },
     });
   } catch (error) {
     next(error);
   }
 };
+
