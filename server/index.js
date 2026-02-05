@@ -6,7 +6,7 @@ import cors from "cors";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import connectDB from "./src/confiq/db.js"
-import UserRouter from "./src/routes/UserRouter.js"
+import UserRouter from './src/routes/UserRouter.js'
 
 const app = express();
 

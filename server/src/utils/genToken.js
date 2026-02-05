@@ -17,7 +17,7 @@ export const genToken = (user, res) => {
       httpOnly: true,
       secure: false,
       sameSite: "lax",
-    });
+    }); 
   } catch (error) {
     throw error;
   }

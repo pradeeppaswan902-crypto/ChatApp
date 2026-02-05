@@ -1,77 +1,69 @@
-import User from "../models/chatappModel.js"
+import User from "../models/chatappModel.js";
 import bcrypt from "bcrypt";
-
-
-
+import { genToken } from "../utils/genToken.js";  // ✅ Import karna
 
 export const UserRegister = async (req, res, next) => {
   try {
-    console.log(req.body);
-    //accept data from Frontend
-    const { fullName, email, phone,  password  } = req.body;
+    const { fullName, email, phone, password } = req.body;
 
-    //verify that all data exist
-    if (!fullName ||  !email || !phone ||  !password) {
-      const error = new Error("All feilds required");
+    if (!fullName || !email || !phone || !password) {
+      const error = new Error("All fields required");
       error.statusCode = 400;
       return next(error);
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       const error = new Error("Email already registered");
       error.statusCode = 409;
       return next(error);
     }
 
-    console.log("Sending Data to DB");
-
-    //encrypt the password
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
 
-    
-    //save data to database
     const newUser = await User.create({
       fullName,
       email: email.toLowerCase(),
       phone,
       password: hashPassword,
-      
     });
 
-    
-    console.log(newUser);
-    res.status(201).json({ message: "Registration Successfull" });
-    
+    // ✅ Token generate using genToken from utils
+    const token = genToken(newUser);
+
+    res.status(201).json({
+      message: "Registration Successful",
+      data: {
+        id: newUser._id,
+        fullName: newUser.fullName,
+        email: newUser.email,
+        phone: newUser.phone,
+        token, // send token to frontend
+      },
+    });
   } catch (error) {
     next(error);
   }
 };
 
 export const UserLogin = async (req, res, next) => {
-  conslo.log("Working")
-  
   try {
-    //Fetch Data from Frontend
     const { email, password } = req.body;
 
-    //verify that all data exist
     if (!email || !password) {
-      const error = new Error("All feilds required");
+      const error = new Error("All fields required");
       error.statusCode = 400;
       return next(error);
     }
 
-    //Check if user is registred or not
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (!existingUser) {
       const error = new Error("Email not registered");
       error.statusCode = 401;
       return next(error);
     }
 
-    //verify the Password
     const isVerified = await bcrypt.compare(password, existingUser.password);
     if (!isVerified) {
       const error = new Error("Password didn't match");
@@ -79,14 +71,20 @@ export const UserLogin = async (req, res, next) => {
       return next(error);
     }
 
-    //Token Generation will be done here
-    genToken(existingUser, res);
+    // ✅ Token generate using genToken from utils
+    const token = genToken(existingUser);
 
-    //send message to Frontend
-    res.status(200).json({ message: "Login Successfull", data: existingUser });
-    //End
+    res.status(200).json({
+      message: "Login Successful",
+      data: {
+        id: existingUser._id,
+        fullName: existingUser.fullName,
+        email: existingUser.email,
+        phone: existingUser.phone,
+        token,
+      },
+    });
   } catch (error) {
     next(error);
   }
-    
 };
